@@ -1,26 +1,22 @@
 import config from 'config';
 import { Response } from 'express';
 
-import { Form } from '../components/form';
 import { AppRequest } from '../definitions/appRequest';
 import { RespondentRepresented } from '../definitions/case';
 import { PageUrls, TranslationKeys, ValidationErrors } from '../definitions/constants';
-import { FormContent, FormFields } from '../definitions/form';
+import { FormContent } from '../definitions/form';
 import { getPageContent } from '../helpers/FormHelper';
 import { getLanguageParam, returnValidUrl } from '../helpers/RouterHelpers';
 import { isFieldFilledIn } from '../validators/validator';
 
 export default class LipOrRepController {
-  private readonly form: Form;
   private readonly lipOrRepContent: FormContent = {
     fields: {
       respondentRepresentedQuestion: {
         type: 'radios',
-        label: l => l.legend,
-        labelSize: 'l',
-        labelHidden: false,
         classes: 'govuk-radios',
         id: 'lip-or-representative',
+        label: l => l.legend,
         values: [
           {
             label: l => l.radio1,
@@ -42,10 +38,6 @@ export default class LipOrRepController {
       text: l => l.continue,
     },
   };
-
-  constructor() {
-    this.form = new Form(<FormFields>this.lipOrRepContent.fields);
-  }
 
   public post = (req: AppRequest, res: Response): void => {
     req.session.errors = [];
