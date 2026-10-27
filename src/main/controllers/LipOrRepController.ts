@@ -1,4 +1,3 @@
-import config from 'config';
 import { Response } from 'express';
 
 import { AppRequest } from '../definitions/appRequest';
@@ -73,11 +72,11 @@ const getRedirectUrl = (req: AppRequest): string => {
     respondentRepresentedQuestion === RespondentRepresented.MYSELF ||
     respondentRepresentedQuestion === RespondentRepresented.SOMEONE_ELSE
   ) {
-    return PageUrls.CASE_NUMBER_CHECK;
+    return PageUrls.CASE_NUMBER_CHECK + getLanguageParam(req.url);
   }
 
   if (respondentRepresentedQuestion === RespondentRepresented.LEGAL_REP) {
-    return process.env.MANAGE_CASE_URL ?? config.get('services.manageCase.url');
+    return 'RET-6806'; // ToDo
   }
 
   return undefined;
