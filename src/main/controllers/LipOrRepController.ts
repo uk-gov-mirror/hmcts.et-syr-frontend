@@ -4,10 +4,10 @@ import { Response } from 'express';
 import { Form } from '../components/form';
 import { AppRequest } from '../definitions/appRequest';
 import { RespondentRepresented } from '../definitions/case';
-import { PageUrls, TranslationKeys } from '../definitions/constants';
+import { PageUrls, TranslationKeys, ValidationErrors } from '../definitions/constants';
 import { FormContent, FormFields } from '../definitions/form';
 import { getPageContent } from '../helpers/FormHelper';
-import { returnValidUrl } from '../helpers/RouterHelpers';
+import { getLanguageParam, returnValidUrl } from '../helpers/RouterHelpers';
 import { isFieldFilledIn } from '../validators/validator';
 
 export default class LipOrRepController {
@@ -48,7 +48,18 @@ export default class LipOrRepController {
   }
 
   public post = (req: AppRequest, res: Response): void => {
+    req.session.errors = [];
+
     const redirectUrl = getRedirectUrl(req);
+
+    if (!redirectUrl) {
+      req.session.errors.push({
+        propertyName: 'respondentRepresentedQuestion',
+        errorType: ValidationErrors.REQUIRED,
+      });
+      return res.redirect(PageUrls.LIP_OR_REPRESENTATIVE + getLanguageParam(req.url));
+    }
+
     res.redirect(returnValidUrl(redirectUrl));
   };
 
@@ -65,14 +76,17 @@ export default class LipOrRepController {
 
 const getRedirectUrl = (req: AppRequest): string => {
   const { respondentRepresentedQuestion } = req.body;
+
   if (
     respondentRepresentedQuestion === RespondentRepresented.MYSELF ||
     respondentRepresentedQuestion === RespondentRepresented.SOMEONE_ELSE
   ) {
     return PageUrls.CASE_NUMBER_CHECK;
-  } else if (respondentRepresentedQuestion === RespondentRepresented.LEGAL_REP) {
-    return process.env.MANAGE_CASE_URL ?? config.get('services.manageCase.url');
-  } else {
-    return PageUrls.LIP_OR_REPRESENTATIVE;
   }
+
+  if (respondentRepresentedQuestion === RespondentRepresented.LEGAL_REP) {
+    return process.env.MANAGE_CASE_URL ?? config.get('services.manageCase.url');
+  }
+
+  return undefined;
 };
